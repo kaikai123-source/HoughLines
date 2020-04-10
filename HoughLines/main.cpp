@@ -2,15 +2,17 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <iostream>
+using namespace std;
+using namespace cv;
 int main()
 {
-	std::string img_path;
+	cv::Mat src;
 	cv::Mat mat_color;
 	cv::Mat mat_gray;
 	cv::Mat mat_binary;
 	cv::Mat mat_canny;
 
-	mat_color = cv::imread(img_path, 1);
+	src= cv::imread("D:\\2.png", 1);
 	mat_gray = cv::imread("D:\\2.png", 0);
 	
 	cv::Mat elementRect;
@@ -25,22 +27,24 @@ int main()
 
 	
 	std::vector<cv::Vec2f> lines;
-	cv::HoughLines(mat_canny, lines, 1, CV_PI / 180, 150, 0, 0);
+	cv::HoughLines(mat_canny, lines, 1, CV_PI / 180, 60);
 
-	
-	for (size_t i = 0; i < lines.size(); i++)
-	{
-		float rho = lines[i][0], theta = lines[i][1];
-		cv::Point pt1, pt2;
-		double a = cos(theta), b = sin(theta);
-		double x0 = a * rho, y0 = b * rho;
-		pt1.x = cvRound(x0 + 1000 * (-b));
-		pt1.y = cvRound(y0 + 1000 * (a));
-		pt2.x = cvRound(x0 - 1000 * (-b));
-		pt2.y = cvRound(y0 - 1000 * (a));
-		line(mat_color, pt1, pt2, cv::Scalar(255, 0, 0), 1);
+
+	vector<cv::Vec2f>::iterator it = lines.begin();
+	for (; it != lines.end(); ++it) {
+		float rho = (*it)[0], theta = (*it)[1];
+		Point pt1, pt2;
+		double a = cos(theta);
+		double b = sin(theta);
+		double x0 = a*rho;
+		double y0 = b*rho;
+		pt1.x = saturate_cast<int>(x0 + 1000 * (-b));
+		pt1.y = saturate_cast<int>(y0 + 1000 * (a));
+		pt2.x = saturate_cast<int>(x0 -1000 * (-b));
+		pt2.y = saturate_cast<int>(y0 - 1000 * (a));
+		line(src, pt1, pt2, Scalar(0, 255,55), 1, CV_AA);
 	}
-	cv::imshow("gray", mat_gray);
+	cv::imshow("src", src);
 	cv::imshow("dst", mat_canny);
 	cv::waitKey(0);
 
